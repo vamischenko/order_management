@@ -4,10 +4,18 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Миграция: создание таблиц очереди задач.
+ *
+ * Создаёт таблицы jobs (очередь), job_batches (пакетные задачи)
+ * и failed_jobs (упавшие задачи) для работы Laravel Queue с драйвером database.
+ */
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Применяет миграцию: создаёт таблицы jobs, job_batches и failed_jobs.
+     *
+     * @return void
      */
     public function up(): void
     {
@@ -46,7 +54,9 @@ return new class extends Migration
     }
 
     /**
-     * Reverse the migrations.
+     * Откатывает миграцию: удаляет таблицы jobs, job_batches и failed_jobs.
+     *
+     * @return void
      */
     public function down(): void
     {

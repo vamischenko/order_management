@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
+ * Ресурс позиции заказа для API-ответов.
+ *
+ * Преобразует модель OrderItem в массив. Поля product_name и product_sku
+ * включаются только при наличии eager-loaded связи product (whenLoaded).
+ *
  * @OA\Schema(
  *     schema="OrderItemResource",
  *     @OA\Property(property="id", type="integer", example=1),
@@ -19,6 +24,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class OrderItemResource extends JsonResource
 {
+    /**
+     * Преобразует ресурс в массив для JSON-ответа.
+     *
+     * Цены приводятся к float; название и артикул товара подгружаются
+     * лениво через whenLoaded для предотвращения N+1 запросов.
+     *
+     * @param  Request $request Входящий HTTP-запрос
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         return [

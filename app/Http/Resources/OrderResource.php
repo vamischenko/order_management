@@ -6,6 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
+ * Ресурс заказа для API-ответов.
+ *
+ * Преобразует модель Order в массив: идентификатор, статус (строковое значение
+ * enum), итоговая сумма, временные метки (ISO 8601), вложенные ресурсы клиента
+ * и позиций заказа (подгружаются через eager loading).
+ *
  * @OA\Schema(
  *     schema="OrderResource",
  *     @OA\Property(property="id", type="integer", example=1),
@@ -20,6 +26,16 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class OrderResource extends JsonResource
 {
+    /**
+     * Преобразует ресурс в массив для JSON-ответа.
+     *
+     * Статус возвращается как строковое значение enum (->value).
+     * Даты confirmed_at и shipped_at могут быть null.
+     * Связи customer и items включаются только при наличии eager loading.
+     *
+     * @param  Request $request Входящий HTTP-запрос
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         return [

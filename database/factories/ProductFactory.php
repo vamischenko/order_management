@@ -5,6 +5,12 @@ namespace Database\Factories;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * Фабрика для генерации тестовых данных товаров.
+ *
+ * Создаёт товары с реалистичными названиями из 5 категорий автозапчастей.
+ * Поддерживает состояния inStock() и outOfStock() для управления остатком.
+ */
 class ProductFactory extends Factory
 {
     protected $model = Product::class;
@@ -80,6 +86,14 @@ class ProductFactory extends Factory
         ],
     ];
 
+    /**
+     * Возвращает набор атрибутов по умолчанию для модели товара.
+     *
+     * Случайно выбирает категорию и название товара из предопределённых списков,
+     * генерирует уникальный артикул в формате XX-0000-XX.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         $category = $this->faker->randomElement(self::$categories);
@@ -95,6 +109,13 @@ class ProductFactory extends Factory
         ];
     }
 
+    /**
+     * Состояние: товар в наличии.
+     *
+     * Устанавливает stock_quantity от 5 до 50 единиц.
+     *
+     * @return static
+     */
     public function inStock(): static
     {
         return $this->state(fn() => [
@@ -102,6 +123,13 @@ class ProductFactory extends Factory
         ]);
     }
 
+    /**
+     * Состояние: товар отсутствует на складе.
+     *
+     * Устанавливает stock_quantity = 0.
+     *
+     * @return static
+     */
     public function outOfStock(): static
     {
         return $this->state(fn() => [

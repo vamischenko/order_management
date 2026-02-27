@@ -4,10 +4,18 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Миграция: создание таблиц кеша.
+ *
+ * Создаёт таблицы cache и cache_locks, необходимые для работы
+ * драйвера кеша database в Laravel.
+ */
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Применяет миграцию: создаёт таблицы cache и cache_locks.
+     *
+     * @return void
      */
     public function up(): void
     {
@@ -25,7 +33,9 @@ return new class extends Migration
     }
 
     /**
-     * Reverse the migrations.
+     * Откатывает миграцию: удаляет таблицы cache и cache_locks.
+     *
+     * @return void
      */
     public function down(): void
     {
