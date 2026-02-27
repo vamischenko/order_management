@@ -10,6 +10,12 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Cache;
 
 /**
+ * Контроллер товаров.
+ *
+ * Предоставляет только чтение каталога — CRUD товаров не реализован
+ * (каталог заполняется через сидер). Ответ кешируется в Redis на 5 минут
+ * с тегом products для инвалидации при изменении остатков.
+ *
  * @OA\Tag(name="Products", description="Управление товарами")
  */
 class ProductController extends Controller
@@ -37,6 +43,12 @@ class ProductController extends Controller
      *         )
      *     )
      * )
+     *
+     * Результат кешируется на 300 секунд. Ключ кеша зависит от фильтров и номера страницы.
+     * При поддержке тегированного кеша использует тег products для групповой инвалидации.
+     *
+     * @param  Request $request HTTP-запрос с параметрами фильтрации
+     * @return AnonymousResourceCollection
      */
     public function index(Request $request): AnonymousResourceCollection
     {

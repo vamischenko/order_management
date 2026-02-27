@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 /**
+ * Базовый абстрактный контроллер.
+ *
+ * Содержит глобальные OpenAPI-аннотации (Info, Server),
+ * от которых наследуются все контроллеры API.
+ *
  * @OA\Info(
  *     title="Order Management API",
  *     version="1.0.0",

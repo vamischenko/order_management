@@ -13,8 +13,27 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Сервис управления заказами.
+ *
+ * Содержит всю бизнес-логику: создание заказа (с проверкой остатков,
+ * атомарным списанием stock и подсчётом суммы) и смену статуса
+ * (с валидацией допустимых переходов и диспатчем событий).
+ */
 class OrderService
 {
+    /**
+     * Создаёт новый заказ в рамках транзакции БД.
+     *
+     * Для каждой позиции: блокирует строку товара (lockForUpdate),
+     * проверяет достаточность остатка, рассчитывает цены, декрементирует
+     * stock_quantity. После успешного создания инвалидирует кеш товаров.
+     *
+     * @param  CreateOrderData            $data Данные для создания заказа
+     * @return Order                            Созданный заказ с загруженными customer и items.product
+     * @throws InsufficientStockException       Если остатка товара недостаточно
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException Если клиент или товар не найдены
+     */
     public function createOrder(CreateOrderData $data): Order
     {
         /** @var Customer $customer */
@@ -73,6 +92,17 @@ class OrderService
         });
     }
 
+    /**
+     * Изменяет статус заказа с проверкой допустимости перехода.
+     *
+     * При переходе в confirmed устанавливает confirmed_at и диспатчит
+     * событие OrderConfirmed. При переходе в shipped устанавливает shipped_at.
+     *
+     * @param  Order                             $order     Заказ, статус которого нужно изменить
+     * @param  OrderStatus                       $newStatus Целевой статус
+     * @return Order                                        Обновлённый заказ с загруженными связями
+     * @throws InvalidStatusTransitionException            Если переход из текущего статуса в новый недопустим
+     */
     public function changeStatus(Order $order, OrderStatus $newStatus): Order
     {
         $currentStatus = $order->status;

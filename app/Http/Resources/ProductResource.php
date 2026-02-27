@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
+ * Ресурс товара для API-ответов.
+ *
+ * Преобразует модель Product в массив: идентификатор, название,
+ * артикул (SKU), цена (float), остаток на складе и категория.
+ *
  * @OA\Schema(
  *     schema="ProductResource",
  *     @OA\Property(property="id", type="integer", example=1),
@@ -18,6 +23,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class ProductResource extends JsonResource
 {
+    /**
+     * Преобразует ресурс в массив для JSON-ответа.
+     *
+     * Цена приводится к float, чтобы JSON-сериализатор не оборачивал
+     * её в строку при использовании decimal cast.
+     *
+     * @param  Request $request Входящий HTTP-запрос
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         return [

@@ -9,20 +9,42 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 
+/**
+ * Джоб экспорта заказа во внешнюю систему.
+ *
+ * Помещается в очередь exports при подтверждении заказа.
+ * Отправляет данные заказа POST-запросом на URL из конфига services.export.url.
+ * При неудаче выполняется до 3 попыток с интервалом 10 секунд.
+ */
 class ExportOrderJob implements ShouldQueue
 {
     use Queueable;
 
+    /** Максимальное количество попыток выполнения джоба */
     public int $tries = 3;
 
+    /** Задержка в секундах перед повторной попыткой */
     public int $backoff = 10;
 
+    /**
+     * @param Order $order Заказ для экспорта
+     */
     public function __construct(
         public readonly Order $order,
     ) {
         $this->onQueue('exports');
     }
 
+    /**
+     * Выполняет экспорт заказа во внешнюю систему.
+     *
+     * Формирует payload с данными заказа, клиента и позиций,
+     * отправляет HTTP POST-запрос. При успехе обновляет OrderExport
+     * (status=success), при неудаче — бросает исключение для повторной попытки.
+     *
+     * @return void
+     * @throws \RuntimeException Если внешняя система вернула неуспешный ответ
+     */
     public function handle(): void
     {
         $export = OrderExport::firstOrCreate(
@@ -67,6 +89,15 @@ class ExportOrderJob implements ShouldQueue
         }
     }
 
+    /**
+     * Вызывается после исчерпания всех попыток.
+     *
+     * Обновляет запись OrderExport, устанавливая статус failed
+     * и сохраняя сообщение последней ошибки.
+     *
+     * @param  Throwable $exception Исключение последней неудачной попытки
+     * @return void
+     */
     public function failed(Throwable $exception): void
     {
         OrderExport::updateOrCreate(

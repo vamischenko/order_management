@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
+ * Ресурс клиента для API-ответов.
+ *
+ * Преобразует модель Customer в массив с основными полями:
+ * идентификатор, имя, email и номер телефона.
+ *
  * @OA\Schema(
  *     schema="CustomerResource",
  *     @OA\Property(property="id", type="integer", example=1),
@@ -16,6 +21,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class CustomerResource extends JsonResource
 {
+    /**
+     * Преобразует ресурс в массив для JSON-ответа.
+     *
+     * @param  Request $request Входящий HTTP-запрос
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         return [

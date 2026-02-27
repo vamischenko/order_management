@@ -15,10 +15,18 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
+ * Контроллер заказов.
+ *
+ * Тонкий контроллер: делегирует бизнес-логику в OrderService,
+ * сам отвечает только за HTTP-слой (запрос → сервис → ресурс → ответ).
+ *
  * @OA\Tag(name="Orders", description="Управление заказами")
  */
 class OrderController extends Controller
 {
+    /**
+     * @param OrderService $orderService Сервис управления заказами
+     */
     public function __construct(
         private readonly OrderService $orderService,
     ) {}
@@ -45,6 +53,11 @@ class OrderController extends Controller
      *     @OA\Response(response=422, description="Ошибка валидации"),
      *     @OA\Response(response=429, description="Слишком много запросов"),
      * )
+     *
+     * Создаёт заказ через OrderService. Возвращает 201 с данными заказа.
+     *
+     * @param  CreateOrderRequest $request Валидированный запрос
+     * @return JsonResponse
      */
     public function store(CreateOrderRequest $request): JsonResponse
     {
@@ -69,6 +82,12 @@ class OrderController extends Controller
      *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Список заказов")
      * )
+     *
+     * Возвращает пагинированный список заказов. Eager loading customer и items.product
+     * гарантирует отсутствие N+1-запросов.
+     *
+     * @param  Request $request HTTP-запрос с параметрами фильтрации
+     * @return AnonymousResourceCollection
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -92,6 +111,9 @@ class OrderController extends Controller
      *     @OA\Response(response=200, description="Данные заказа", @OA\JsonContent(@OA\Property(property="data", ref="#/components/schemas/OrderResource"))),
      *     @OA\Response(response=404, description="Заказ не найден"),
      * )
+     *
+     * @param  Order $order Заказ (Route Model Binding)
+     * @return OrderResource
      */
     public function show(Order $order): OrderResource
     {
@@ -117,6 +139,10 @@ class OrderController extends Controller
      *     @OA\Response(response=422, description="Недопустимый переход статуса"),
      *     @OA\Response(response=404, description="Заказ не найден"),
      * )
+     *
+     * @param  UpdateOrderStatusRequest $request Валидированный запрос со статусом
+     * @param  Order                    $order   Заказ (Route Model Binding)
+     * @return OrderResource
      */
     public function updateStatus(UpdateOrderStatusRequest $request, Order $order): OrderResource
     {
